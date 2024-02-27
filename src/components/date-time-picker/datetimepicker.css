@@ -1,0 +1,218 @@
+:root {
+    --mid-width: 18rem;
+}
+
+
+.input-div {
+    display: flex;
+    align-items: center;
+    border: 1px solid gray;
+    width: min-content;
+    padding-inline: 0.6rem;
+    border-radius: 5px;
+    justify-content: space-between;
+    gap: 2px;
+    font-family: monospace;
+    cursor: pointer;
+    position: relative;
+    margin-left: 30%;
+    background-color: inherit;
+}
+
+
+.input-div>p {
+    font-weight: 500;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.input-div>svg {
+    margin-left: 1rem;
+}
+
+.calender-div {
+    color: inherit;
+    position: absolute;
+    background-color: inherit;
+    border-radius: 15px;
+    height: 20rem;
+    padding-bottom: 1rem;
+    width: var(--mid-width);
+    top: 110%;
+    left: 50%;
+    transform: scale(0.7) translateX(-50%);
+    transition: all 0.2s;
+    opacity: 0;
+    box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
+    z-index: 10000;
+}
+
+.calender-open {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+}
+
+.calender-main {
+    padding-top: 10px;
+    height: 100%;
+    width: 100%;
+    color: inherit;
+    cursor: auto;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+}
+
+.calender-header {
+    padding-top: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 15px;
+}
+
+.calender-header>h2 {
+    font-size: 1rem;
+    color: inherit;
+    margin: 0;
+    text-align: start;
+}
+
+.calender-header>span>button {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+}
+
+.calender-grid {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, 2rem);
+    grid-template-rows: 2rem;
+    grid-auto-rows: 2rem;
+    column-gap: 8px;
+    row-gap: 10px;
+}
+
+.calender-grid>span {
+    text-align: center;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+
+.calender-grid-header {
+    padding-top: 10px;
+    display: grid;
+    justify-content: center;
+    grid-template-columns: repeat(7, 2rem);
+    grid-template-rows: 2rem;
+    column-gap: 8px;
+    row-gap: 10px;
+}
+
+.calender-grid-header>span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.calender-swipe-container {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+}
+
+
+.calender-swipe-item {
+    position: absolute;
+    transition: transform 0.3s ease-out;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-width: var(--mid-width);
+    top: 0;
+    right: 0;
+    left: 0;
+}
+
+
+.year-button>label {
+    border-radius: 50%;
+    aspect-ratio: 1;
+    padding: 5px;
+    height: 10px;
+    cursor: pointer;
+    display: flex;
+    transition: all 0.3s;
+
+}
+
+.year-button>input:checked+label {
+    transform: rotate(-180deg);
+}
+
+.year-selector-list {
+    list-style: none;
+    position: absolute;
+    height: auto;
+    width: 100%;
+    z-index: 5000;
+    top: 120%;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+    gap: 10px;
+    max-height: 20rem;
+    overflow-y: scroll;
+    border-radius: 10px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    transition: transform 0.2s;
+    transform-origin: top center;
+}
+
+.year-selector-list>li {
+    text-align: center;
+    padding-block: 0.3rem;
+}
+
+.year-selector-list>li>button {
+    background-color: transparent;
+    border: none;
+    padding-block: 5px;
+    padding-inline: 10px;
+    border-radius: 5rem;
+    cursor: pointer;
+    font-weight: bolder;
+    font-size: large;
+}
+
+.year-selector-list::-webkit-scrollbar {
+    display: none;
+}
+
+
+@media (hover: hover) {
+    .year-button>label:hover {
+        background-color: rgba(128, 128, 128, 0.22)
+    }
+
+    .calender-grid>span:hover {
+        background-color: rgba(128, 128, 128, 0.12);
+    }
+
+    .year-selector-list>li>button:hover {
+        background-color: rgba(128, 128, 128, 0.22);
+    }
+}
