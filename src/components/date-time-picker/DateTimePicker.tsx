@@ -5,6 +5,8 @@ import React, {
   useMemo,
   useRef,
   useState,
+  createContext,
+  useContext,
 } from "react"
 import "./datetimepicker.css"
 import CalenderSvg from "../../svg/Calender"
@@ -12,6 +14,7 @@ import dayjs from "dayjs"
 import Arrow from "../../svg/Arrow.svg"
 import Expand from "../../svg/Expand"
 import { getMonth } from "../../func/month"
+import TimePicker from "./components/TimePicker"
 
 const date = dayjs()
 
@@ -26,7 +29,21 @@ type props = {
   calenderFontColor: CSSProperties["backgroundColor"]
   currentDayIndicatorCOlor: CSSProperties["backgroundColor"]
   yearSelectorBackgroundColor: CSSProperties["backgroundColor"]
+  yearRange?: {
+    startYear: number
+    endYear: number
+  }
+  onChange: (value: string) => void
 }
+
+type extraContext = {
+  setDateStr: React.Dispatch<React.SetStateAction<string>>
+  setShowClock: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+export const calenderContext = createContext<
+  Partial<props> & Partial<extraContext>
+>({})
 
 const DateTimePicker = ({
   FontColor = "gray",
@@ -39,10 +56,18 @@ const DateTimePicker = ({
   calenderFontColor = "dodgerblue",
   currentDayIndicatorCOlor = "gray",
   yearSelectorBackgroundColor = "white",
+  yearRange = {
+    startYear: 1950,
+    endYear: 2100,
+  },
+  onChange = () => {},
 }: Partial<props>) => {
   const ref = useRef<HTMLDivElement>(null)
 
   const [open, setOpen] = useState(false)
+
+  const [dateStr, setDateStr] = useState("DD/MM/YYYY hh/mm aa")
+  const [showClock, setShowClock] = useState(false)
 
   const handleOpen = useCallback(() => {
     setOpen(true)
@@ -50,10 +75,14 @@ const DateTimePicker = ({
   const handleClose = useCallback((event: MouseEvent) => {
     if (ref.current && !ref.current.contains(event.target as Node)) {
       setOpen(false)
+      onChange(dateStr)
     }
   }, [])
 
   useEffect(() => {
+    if (yearRange.endYear < yearRange.startYear) {
+      throw Error("start year must be smaller than end Year")
+    }
     document.addEventListener("click", handleClose)
     return () => document.removeEventListener("click", handleClose)
   }, [])
@@ -70,18 +99,38 @@ const DateTimePicker = ({
         color: FontColor,
       }}
     >
-      <p>DD/MM/YYYY hh/mm aa</p>
+      <p>{dateStr}</p>
       <CalenderSvg
         height={calenderSize}
         color={CalenderLogoColor}
       />
-      <Calender
-        open={open}
-        color={calenderFontColor}
-        currentDay={currentDayIndicatorCOlor}
-        calenderFontColor={calenderFontColor}
-        yearSelectorBackgroundColor={yearSelectorBackgroundColor}
-      />
+      <calenderContext.Provider
+        value={{
+          FontColor,
+          CalenderLogoColor,
+          borderColor,
+          borderWidth,
+          width,
+          calenderSize,
+          focusBorderColor,
+          calenderFontColor,
+          currentDayIndicatorCOlor,
+          yearSelectorBackgroundColor,
+          setDateStr,
+          yearRange,
+          setShowClock,
+        }}
+      >
+        {!showClock ? (
+          <Calender
+            open={open}
+            color={calenderFontColor}
+            currentDay={currentDayIndicatorCOlor}
+          />
+        ) : (
+          <TimePicker />
+        )}
+      </calenderContext.Provider>
     </div>
   )
 }
@@ -92,29 +141,47 @@ const Calender = ({
   open,
   color,
   currentDay,
-  calenderFontColor,
-  yearSelectorBackgroundColor,
 }: {
   open: boolean
   color: string
   currentDay: string
-  calenderFontColor: string
-  yearSelectorBackgroundColor: string
 }) => {
+  const { yearRange, setDateStr } = useContext(calenderContext)
+
   const [show, setShow] = useState(false)
   const [month, setMonth] = useState<{
     month: number
     year: number
-    date: number
+    date: string
     dayList: any[]
   }>(() => ({
     month: date.month(),
     year: date.year(),
-    date: date.date(),
+    date: date.format("MM-DD-YYYY"),
     dayList: getMonth({ month: date.month(), year: date.year() }),
   }))
   const [swipeList, setSwipeList] = useState([
     <Grid
+      handleDayChange={(date: dayjs.Dayjs) => {
+        setMonth({
+          ...month,
+          date: date.format("MM-DD-YYYY"),
+        })
+        setDateStr!(date.format("DD/MM/YYYY hh/mm a"))
+        setSwipeList([
+          <Grid
+            handleDayChange={handleDayChange}
+            selectedDay={date.format("MM-DD-YYYY")}
+            currentDay={currentDay}
+            dayList={month.dayList}
+            key={date.toString()}
+            position="change"
+            setList={setSwipeList}
+            left="0%"
+          />,
+        ])
+      }}
+      selectedDay={"0"}
       dayList={month.dayList}
       currentDay={currentDay}
       key={`num-1`}
@@ -122,11 +189,51 @@ const Calender = ({
   ])
   const [last, setLast] = useState<"next" | "prev" | null>(null)
 
-  useEffect(() => {
-    if (open) {
-      setShow(true)
-    }
-  }, [open])
+  const handleYearChange = (year: number) => {
+    const { month: currMonth } = month
+    const currdate = dayjs(month.date).date()
+    const newMonth = date.year(year).month(currMonth).date(currdate)
+    const data = getMonth({ month: newMonth.month(), year: newMonth.year() })
+    setMonth({
+      ...month,
+      year: newMonth.year(),
+      dayList: data,
+      date: newMonth.format("MM-DD-YYYY"),
+    })
+    setDateStr!(newMonth.format("DD/MM/YYYY hh/mm a"))
+    setSwipeList([
+      <Grid
+        handleDayChange={handleDayChange}
+        selectedDay={newMonth.format("MM-DD-YYYY")}
+        currentDay={currentDay}
+        dayList={data}
+        key={newMonth.toString()}
+        position="change"
+        setList={setSwipeList}
+        left="0%"
+      />,
+    ])
+  }
+
+  const handleDayChange = (date: dayjs.Dayjs) => {
+    setMonth({
+      ...month,
+      date: date.format("MM-DD-YYYY"),
+    })
+    setDateStr!(date.format("DD/MM/YYYY hh/mm a"))
+    setSwipeList([
+      <Grid
+        handleDayChange={handleDayChange}
+        selectedDay={date.format("MM-DD-YYYY")}
+        currentDay={currentDay}
+        dayList={month.dayList}
+        key={date.toString()}
+        position="change"
+        setList={setSwipeList}
+        left="0%"
+      />,
+    ])
+  }
 
   const handleNext = () => {
     if (swipeList.length > 1) {
@@ -134,16 +241,21 @@ const Calender = ({
     }
     const { date: currdate, month: currMonth, year } = month
     const newMonth = date.year(year).month(currMonth).add(1, "month")
+    if (newMonth.year() > yearRange!.endYear) {
+      return
+    }
     const data = getMonth({ month: newMonth.month(), year: newMonth.year() })
     setMonth({
+      ...month,
       month: newMonth.month(),
       year: newMonth.year(),
-      date: 1,
       dayList: data,
     })
     const list = [
       ...swipeList,
       <Grid
+        handleDayChange={handleDayChange}
+        selectedDay={currdate}
         currentDay={currentDay}
         dayList={data}
         key={newMonth.toString()}
@@ -161,16 +273,21 @@ const Calender = ({
     }
     const { date: currdate, month: currMonth, year } = month
     const newMonth = date.year(year).month(currMonth).subtract(1, "month")
+    if (newMonth.year() < yearRange!.startYear) {
+      return
+    }
     const data = getMonth({ month: newMonth.month(), year: newMonth.year() })
     setMonth({
+      ...month,
       month: newMonth.month(),
       year: newMonth.year(),
-      date: 1,
       dayList: data,
     })
     const list = [
       ...swipeList,
       <Grid
+        handleDayChange={handleDayChange}
+        selectedDay={currdate}
         currentDay={currentDay}
         dayList={data}
         key={newMonth.toString()}
@@ -182,6 +299,12 @@ const Calender = ({
     setSwipeList(list)
     setLast("prev")
   }
+
+  useEffect(() => {
+    if (open) {
+      setShow(true)
+    }
+  }, [open])
 
   useEffect(() => {
     if (last != null) {
@@ -215,9 +338,8 @@ const Calender = ({
             <h2 style={{ display: "flex", position: "relative" }}>
               {date.year(month.year).month(month.month).format("MMMM YYYY")}
               <YearSelector
-                calenderFontColor={calenderFontColor}
+                handleClick={handleYearChange}
                 currentYear={month.year}
-                yearSelectorBackgroundColor={yearSelectorBackgroundColor}
               />
             </h2>
             <span style={{ display: "flex", gap: 15 }}>
@@ -258,6 +380,8 @@ const Grid = ({
   list,
   position,
   setList,
+  selectedDay,
+  handleDayChange,
 }: {
   dayList: any[]
   currentDay: string
@@ -265,7 +389,12 @@ const Grid = ({
   list?: JSX.Element[]
   setList?: React.Dispatch<React.SetStateAction<JSX.Element[]>>
   position?: "change"
+  selectedDay: string
+  handleDayChange: (date: dayjs.Dayjs) => void
 }) => {
+  const { calenderFontColor, yearSelectorBackgroundColor, setShowClock } =
+    useContext(calenderContext)
+
   return (
     <div
       className="calender-swipe-item"
@@ -289,10 +418,17 @@ const Grid = ({
             key={`date-${num}`}
             style={{
               border:
-                i === date.format("MM-DD-YYYY")
+                i === date.format("MM-DD-YYYY") && selectedDay !== i
                   ? `1px solid ${currentDay}`
                   : "",
               visibility: i == null ? "hidden" : "initial",
+              backgroundColor: selectedDay === i ? calenderFontColor : "",
+              color: selectedDay === i ? yearSelectorBackgroundColor : "",
+            }}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleDayChange(dayjs(i))
+              setShowClock!(true)
             }}
           >
             {i != null && dayjs(i).date()}
@@ -304,29 +440,29 @@ const Grid = ({
 }
 
 const YearSelector = ({
-  calenderFontColor,
   currentYear,
-  yearSelectorBackgroundColor,
+  handleClick,
 }: {
-  calenderFontColor: string
   currentYear: number
-  yearSelectorBackgroundColor: string
+  handleClick: (year: number) => void
 }) => {
   const ulRef = useRef<HTMLUListElement>(null)
 
   const [open, setOpen] = useState(false)
 
+  const { yearSelectorBackgroundColor, calenderFontColor, yearRange } =
+    useContext(calenderContext)
+
   const yearList = useMemo(() => {
-    const startYear = date.year() - 50
-    const endYear = date.year() + 50
-    return Array.from({ length: endYear - startYear }).map(
+    const { endYear, startYear } = yearRange!
+    return Array.from({ length: endYear - startYear + 1 }).map(
       (_, num) => startYear + num
     )
   }, [])
   useEffect(() => {
     if (ulRef.current) {
       const listItem = ulRef.current.querySelector(
-        `li:nth-child(${currentYear - 1974})`
+        `li:nth-child(${currentYear - yearRange!.startYear})`
       ) as HTMLLIElement
       if (listItem) {
         const ulTop = ulRef.current.offsetTop
@@ -338,25 +474,19 @@ const YearSelector = ({
         })
       }
     }
-  }, [open, currentYear])
+  }, [currentYear])
 
   return (
     <div className="year-selector-div">
       <div className="year-button">
-        <input
-          type="checkbox"
-          style={{ display: "none" }}
-          id="react-datepicker-expand"
-        />
-        <label
-          htmlFor="react-datepicker-expand"
+        <button
           onClick={(e) => {
-            e.stopPropagation()
             setOpen(!open)
           }}
+          style={{ transform: `rotate(${!open ? "0deg" : "-180deg"})` }}
         >
           <Expand />
-        </label>
+        </button>
       </div>
       <ul
         ref={ulRef}
@@ -375,6 +505,10 @@ const YearSelector = ({
                     ? yearSelectorBackgroundColor
                     : calenderFontColor,
                 backgroundColor: i !== currentYear ? "" : calenderFontColor,
+              }}
+              onClick={() => {
+                handleClick(i)
+                setOpen(false)
               }}
             >
               {i}

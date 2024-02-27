@@ -143,20 +143,19 @@
 }
 
 
-.year-button>label {
+.year-button>button {
     border-radius: 50%;
     aspect-ratio: 1;
-    padding: 5px;
-    height: 10px;
     cursor: pointer;
-    display: flex;
     transition: all 0.3s;
-
+    background-color: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.year-button>input:checked+label {
-    transform: rotate(-180deg);
-}
+
 
 .year-selector-list {
     list-style: none;
@@ -204,7 +203,7 @@
 
 
 @media (hover: hover) {
-    .year-button>label:hover {
+    .year-button>button:hover {
         background-color: rgba(128, 128, 128, 0.22)
     }
 
