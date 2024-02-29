@@ -1,5 +1,6 @@
 :root {
     --mid-width: 18rem;
+    --shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
 }
 
 
@@ -44,7 +45,7 @@
     transform: scale(0.7) translateX(-50%);
     transition: all 0.2s;
     opacity: 0;
-    box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
+    box-shadow: var(--shadow);
     z-index: 10000;
 }
 
@@ -201,6 +202,94 @@
     display: none;
 }
 
+.hour-clock {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    isolation: isolate;
+    cursor: auto;
+    display: grid;
+}
+
+.hour-clock-container {
+    background-color: inherit;
+    height: 280px;
+    width: 250px;
+    border-radius: 0.8rem;
+    box-shadow: var(--shadow);
+    position: absolute;
+    top: 120%;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    user-select: none;
+    padding-top: 15px;
+    cursor: auto;
+    transition: all 0.3s;
+}
+
+
+.hour-clock-numbers {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    font-size: 14px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+
+}
+
+.clock-pointer {
+    position: absolute;
+    height: 10px;
+    height: 85px;
+    width: 2px;
+    transform-origin: top center;
+    top: 50%;
+    transition: transform 0.3s;
+    transform: rotate(0deg) translate(50%, -100%);
+    justify-self: center;
+}
+
+.clock-pointer::before {
+    content: '';
+    position: absolute;
+    height: 30px;
+    aspect-ratio: 1;
+    background-color: inherit;
+    transform: translate(-50%, -100%);
+    opacity: 0.3;
+    border-radius: 50%;
+}
+
+
+.clock-button-container {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+}
+
+.clock-button-container>button {
+    border: none;
+    padding: 0;
+    background-color: transparent;
+    font-weight: bold;
+    aspect-ratio: 1;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+}
+
+.clock-close {
+    transform: scale(0.7);
+    opacity: 0;
+}
 
 @media (hover: hover) {
     .year-button>button:hover {
@@ -212,6 +301,10 @@
     }
 
     .year-selector-list>li>button:hover {
+        background-color: rgba(128, 128, 128, 0.22);
+    }
+
+    .clock-button-container>button:hover {
         background-color: rgba(128, 128, 128, 0.22);
     }
 }

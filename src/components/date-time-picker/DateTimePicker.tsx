@@ -34,11 +34,16 @@ type props = {
     endYear: number
   }
   onChange: (value: string) => void
+  clockFontColor: CSSProperties["backgroundColor"]
+  clockPointerColor: CSSProperties["backgroundColor"]
+  popUpBackgroundColor: CSSProperties["backgroundColor"]
+  selectedFontColor: CSSProperties["backgroundColor"]
 }
 
 type extraContext = {
   setDateStr: React.Dispatch<React.SetStateAction<string>>
   setShowClock: React.Dispatch<React.SetStateAction<boolean>>
+  dateStr: string
 }
 
 export const calenderContext = createContext<
@@ -61,6 +66,9 @@ const DateTimePicker = ({
     endYear: 2100,
   },
   onChange = () => {},
+  clockFontColor = "gray",
+  clockPointerColor = "dodgerblue",
+  selectedFontColor = "white",
 }: Partial<props>) => {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -119,6 +127,10 @@ const DateTimePicker = ({
           setDateStr,
           yearRange,
           setShowClock,
+          clockFontColor,
+          clockPointerColor,
+          dateStr,
+          selectedFontColor,
         }}
       >
         {!showClock ? (
@@ -128,7 +140,7 @@ const DateTimePicker = ({
             currentDay={currentDayIndicatorCOlor}
           />
         ) : (
-          <TimePicker />
+          <TimePicker open={open} />
         )}
       </calenderContext.Provider>
     </div>
@@ -146,7 +158,8 @@ const Calender = ({
   color: string
   currentDay: string
 }) => {
-  const { yearRange, setDateStr } = useContext(calenderContext)
+  const { yearRange, setDateStr, popUpBackgroundColor, dateStr } =
+    useContext(calenderContext)
 
   const [show, setShow] = useState(false)
   const [month, setMonth] = useState<{
@@ -154,12 +167,21 @@ const Calender = ({
     year: number
     date: string
     dayList: any[]
-  }>(() => ({
-    month: date.month(),
-    year: date.year(),
-    date: date.format("MM-DD-YYYY"),
-    dayList: getMonth({ month: date.month(), year: date.year() }),
-  }))
+  }>(() => {
+    const day = dateStr?.split(" ")[0].split("/") as string[]
+
+    const m = isNaN(parseInt(day[1])) ? date.month() : parseInt(day[1]) - 1
+    const y = isNaN(parseInt(day[2])) ? date.year() : parseInt(day[2])
+
+    const d = (day[1] + "-" + day[0] + "-" + day[2]) as string
+    const obj = {
+      month: m,
+      year: y,
+      date: dayjs(d).format("MM-DD-YYYY"),
+      dayList: getMonth({ month: m, year: y }),
+    }
+    return obj
+  })
   const [swipeList, setSwipeList] = useState([
     <Grid
       handleDayChange={(date: dayjs.Dayjs) => {
@@ -175,13 +197,12 @@ const Calender = ({
             currentDay={currentDay}
             dayList={month.dayList}
             key={date.toString()}
-            position="change"
             setList={setSwipeList}
             left="0%"
           />,
         ])
       }}
-      selectedDay={"0"}
+      selectedDay={month.date}
       dayList={month.dayList}
       currentDay={currentDay}
       key={`num-1`}
@@ -228,7 +249,6 @@ const Calender = ({
         currentDay={currentDay}
         dayList={month.dayList}
         key={date.toString()}
-        position="change"
         setList={setSwipeList}
         left="0%"
       />,
@@ -326,7 +346,7 @@ const Calender = ({
     (show || open) && (
       <div
         className={`calender-div ${show && open ? "calender-open" : ""}`}
-        style={{ color }}
+        style={{ color, backgroundColor: popUpBackgroundColor }}
         onTransitionEnd={() => {
           if (!open) {
             setShow(false)
@@ -392,9 +412,8 @@ const Grid = ({
   selectedDay: string
   handleDayChange: (date: dayjs.Dayjs) => void
 }) => {
-  const { calenderFontColor, yearSelectorBackgroundColor, setShowClock } =
+  const { calenderFontColor, selectedFontColor, setShowClock } =
     useContext(calenderContext)
-
   return (
     <div
       className="calender-swipe-item"
@@ -423,7 +442,7 @@ const Grid = ({
                   : "",
               visibility: i == null ? "hidden" : "initial",
               backgroundColor: selectedDay === i ? calenderFontColor : "",
-              color: selectedDay === i ? yearSelectorBackgroundColor : "",
+              color: selectedDay === i ? selectedFontColor : "",
             }}
             onClick={(e) => {
               e.stopPropagation()
