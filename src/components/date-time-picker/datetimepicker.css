@@ -256,8 +256,7 @@
     justify-self: center;
 }
 
-.clock-pointer::before {
-    content: '';
+.clock-pointer>span {
     position: absolute;
     height: 30px;
     aspect-ratio: 1;
@@ -265,6 +264,12 @@
     transform: translate(-50%, -100%);
     opacity: 0.3;
     border-radius: 50%;
+}
+
+.clock-pointer::before {
+    content: '';
+    position: absolute;
+    inset: 0 -10px;
 }
 
 

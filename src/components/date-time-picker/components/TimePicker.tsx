@@ -7,25 +7,27 @@ import React, {
   useContext,
 } from "react"
 import "../datetimepicker.css"
-import { calenderContext } from "../DateTimePicker"
+import { calenderContext, extraContext } from "../DateTimePicker"
+import dayjs from "dayjs"
 
 const TimePicker = ({ open }: { open: boolean }) => {
   const {
     clockFontColor,
     clockPointerColor,
-    setDateStr,
     dateStr,
     popUpBackgroundColor,
     selectedFontColor,
     setShowClock,
-  } = useContext(calenderContext)
+    changeDate,
+  } = useContext(calenderContext) as extraContext & Record<any, any>
 
   const clockRef = useRef<HTMLDivElement>(null)
   const pointerRef = useRef<HTMLDivElement>(null)
 
-  const [amPm, setAmPm] = useState<"am" | "pm">("am")
   const [clos, setClose] = useState(true)
-  const [minutes, setMinutes] = useState(true)
+  const [minutes, setMinutes] = useState(false)
+  const [visble, setVisible] = useState(true)
+  const [drag, setDrag] = useState(false)
 
   const renderNumbers = useCallback(() => {
     const numbers = []
@@ -64,39 +66,89 @@ const TimePicker = ({ open }: { open: boolean }) => {
           (Math.atan2(y - 100, x - 100) * 180) / Math.PI + 90
         )
         const normalizedDegrees = (degrees + 360) % 360
-        const nearestHour = Math.round((normalizedDegrees % 360) / 30) % 12
 
-        pointerRef.current!.style.transform = `rotate(${
-          nearestHour * 30
-        }deg) translate(50%, -100%)`
-        const str = dateStr?.split(" ")!
         if (minutes) {
-          const minutes = nearestHour === 0 ? "00" : `${5 * nearestHour}`
-          const hour = str[1].split("/")[0]
-          str[1] = hour + "/" + minutes
-          console.log(minutes, hour)
-          setDateStr!(str.join(" "))
+          const mm = Math.ceil(normalizedDegrees / 6)
+          setVisible((mm * 6) % 30 === 0)
+          pointerRef.current!.style.transform = `rotate(${
+            mm * 6
+          }deg) translate(50%, -100%)`
+          const minutes = mm % 60 === 0 ? "00" : `${mm}`
+          changeDate("minutes", minutes)
         } else {
+          const nearestHour = Math.round((normalizedDegrees % 360) / 30) % 12
+          pointerRef.current!.style.transform = `rotate(${
+            nearestHour * 30
+          }deg) translate(50%, -100%)`
           const hour =
             nearestHour === 0
               ? "12"
               : nearestHour < 10
               ? `0${nearestHour}`
-              : nearestHour
-
-          str[1] = hour + "/00"
-          setDateStr!(str.join(" "))
+              : nearestHour.toString()
+          if (dateStr.hour === hour) {
+            setMinutes(true)
+            return
+          }
+          changeDate("hour", hour)
         }
       }
     },
-    []
+    [minutes, dateStr]
   )
-  const handleAmPmChange = useCallback((val: "am" | "pm") => {
-    const str = dateStr?.split(" ")!
-    str[2] = val
-    setDateStr!(str.join(" "))
-    setAmPm(val)
-  }, [])
+
+  const handleMove = useCallback(
+    (e: MouseEvent) => {
+      if (minutes && drag) {
+        const elm = clockRef.current
+        if (elm) {
+          const position = elm.getBoundingClientRect()
+          const x = e.clientX - position.left
+          const y = e.clientY - position.top
+          const degrees = Math.floor(
+            (Math.atan2(y - 100, x - 100) * 180) / Math.PI + 90
+          )
+          const normalizedDegrees = (degrees + 360) % 360
+          const mm = Math.ceil(normalizedDegrees / 6)
+          setVisible((mm * 6) % 30 === 0)
+          pointerRef.current!.style.transform = `rotate(${
+            mm * 6
+          }deg) translate(50%, -100%)`
+          const minutes = mm % 60 === 0 ? "00" : `${mm}`
+          changeDate("minutes", minutes)
+        }
+      }
+    },
+    [drag]
+  )
+
+  const handleAmPmChange = useCallback(
+    (val: "am" | "pm") => {
+      changeDate("timeRange", val)
+    },
+    [dateStr]
+  )
+
+  useEffect(() => {
+    clockRef.current?.addEventListener("mousemove", handleMove)
+    return () => clockRef.current?.removeEventListener("mousemove", handleMove)
+  }, [drag])
+
+  useEffect(() => {
+    const h = dateStr?.hour === "hh" ? false : parseInt(dateStr!.hour)
+    const m = dateStr?.minutes === "mm" ? false : parseInt(dateStr!.minutes)
+    if (!minutes && h) {
+      pointerRef.current!.style.transform = `rotate(${
+        (h % 12) * 30
+      }deg) translate(50%, -100%)`
+    } else if (m !== false) {
+      setVisible((m * 6) % 30 === 0)
+      pointerRef.current!.style.transform = `rotate(${
+        m * 6
+      }deg) translate(50%, -100%)`
+    }
+  }, [minutes])
+
   return (
     clos && (
       <main
@@ -119,13 +171,34 @@ const TimePicker = ({ open }: { open: boolean }) => {
             style={{ backgroundColor: clockPointerColor }}
             className="clock-pointer"
             ref={pointerRef}
-          ></div>
+            onMouseDown={(e) => {
+              if (!drag && minutes) {
+                e.stopPropagation()
+                setDrag(true)
+                e.currentTarget.style.cursor = "grabbing"
+              }
+            }}
+            onMouseUp={(e) => {
+              if (drag && minutes) {
+                e.stopPropagation()
+                setDrag(false)
+                e.currentTarget.style.cursor = "auto"
+              }
+            }}
+            onTransitionEnd={() => {
+              setMinutes(true)
+            }}
+          >
+            <span style={{ display: visble ? "initial" : "none" }}></span>
+          </div>
         </div>
         <section className="clock-button-container">
           <button
             style={{
-              color: amPm === "am" ? selectedFontColor : clockFontColor,
-              backgroundColor: amPm === "am" ? clockPointerColor : "",
+              color:
+                dateStr.timeRange === "am" ? selectedFontColor : clockFontColor,
+              backgroundColor:
+                dateStr.timeRange === "am" ? clockPointerColor : "",
             }}
             onClick={() => handleAmPmChange("am")}
           >
@@ -133,8 +206,10 @@ const TimePicker = ({ open }: { open: boolean }) => {
           </button>
           <button
             style={{
-              color: amPm === "pm" ? selectedFontColor : clockFontColor,
-              backgroundColor: amPm === "pm" ? clockPointerColor : "",
+              color:
+                dateStr.timeRange === "pm" ? selectedFontColor : clockFontColor,
+              backgroundColor:
+                dateStr.timeRange === "pm" ? clockPointerColor : "",
             }}
             onClick={() => handleAmPmChange("pm")}
           >

@@ -40,10 +40,30 @@ type props = {
   selectedFontColor: CSSProperties["backgroundColor"]
 }
 
-type extraContext = {
-  setDateStr: React.Dispatch<React.SetStateAction<string>>
+export type extraContext = {
+  setDateStr: React.Dispatch<
+    React.SetStateAction<{
+      date: string
+      month: string
+      year: string
+      hour: string
+      minutes: string
+      timeRange: string
+    }>
+  >
   setShowClock: React.Dispatch<React.SetStateAction<boolean>>
-  dateStr: string
+  dateStr: {
+    date: string
+    month: string
+    year: string
+    hour: string
+    minutes: string
+    timeRange: string
+  }
+  changeDate: (
+    key: "date" | "hour" | "minutes" | "timeRange" | "year" | "month",
+    value: string
+  ) => void
 }
 
 export const calenderContext = createContext<
@@ -74,7 +94,14 @@ const DateTimePicker = ({
 
   const [open, setOpen] = useState(false)
 
-  const [dateStr, setDateStr] = useState("DD/MM/YYYY hh/mm aa")
+  const [dateStr, setDateStr] = useState({
+    date: "DD",
+    month: "MM",
+    year: "YYYY",
+    hour: "hh",
+    minutes: "mm",
+    timeRange: "aa",
+  })
   const [showClock, setShowClock] = useState(false)
 
   const handleOpen = useCallback(() => {
@@ -83,9 +110,55 @@ const DateTimePicker = ({
   const handleClose = useCallback((event: MouseEvent) => {
     if (ref.current && !ref.current.contains(event.target as Node)) {
       setOpen(false)
-      onChange(dateStr)
+      onChange(getStr())
     }
   }, [])
+
+  const getStr = useCallback(() => {
+    return `${dateStr.date}/${dateStr.month}/${dateStr.year} ${dateStr.hour}/${dateStr.minutes} ${dateStr.timeRange}`
+  }, [dateStr])
+
+  const changeDate = (
+    key: "date" | "hour" | "minutes" | "timeRange" | "year" | "month",
+    value: string
+  ) => {
+    const { date, hour, minutes, month, timeRange, year } = dateStr
+    if (key === "date") {
+      const dd = (value as string).split("-")
+      if (minutes === "mm") {
+        setDateStr({
+          date: dd[1],
+          month: dd[0],
+          year: dd[2],
+          hour: "12",
+          minutes: "00",
+          timeRange: "am",
+        })
+      } else {
+        setDateStr({
+          ...dateStr,
+          date: dd[1],
+          month: dd[0],
+          year: dd[2],
+        })
+      }
+    } else if (key === "hour") {
+      setDateStr({
+        ...dateStr,
+        hour: value,
+      })
+    } else if (key === "minutes") {
+      setDateStr({
+        ...dateStr,
+        minutes: value.length !== 1 ? value : "0" + value,
+      })
+    } else if (key === "timeRange") {
+      setDateStr({
+        ...dateStr,
+        timeRange: value,
+      })
+    }
+  }
 
   useEffect(() => {
     if (yearRange.endYear < yearRange.startYear) {
@@ -107,7 +180,7 @@ const DateTimePicker = ({
         color: FontColor,
       }}
     >
-      <p>{dateStr}</p>
+      <p>{getStr()}</p>
       <CalenderSvg
         height={calenderSize}
         color={CalenderLogoColor}
@@ -131,6 +204,7 @@ const DateTimePicker = ({
           clockPointerColor,
           dateStr,
           selectedFontColor,
+          changeDate,
         }}
       >
         {!showClock ? (
@@ -158,8 +232,8 @@ const Calender = ({
   color: string
   currentDay: string
 }) => {
-  const { yearRange, setDateStr, popUpBackgroundColor, dateStr } =
-    useContext(calenderContext)
+  const { yearRange, setDateStr, popUpBackgroundColor, dateStr, changeDate } =
+    useContext(calenderContext) as extraContext & Record<any, any>
 
   const [show, setShow] = useState(false)
   const [month, setMonth] = useState<{
@@ -168,12 +242,14 @@ const Calender = ({
     date: string
     dayList: any[]
   }>(() => {
-    const day = dateStr?.split(" ")[0].split("/") as string[]
-
-    const m = isNaN(parseInt(day[1])) ? date.month() : parseInt(day[1]) - 1
-    const y = isNaN(parseInt(day[2])) ? date.year() : parseInt(day[2])
-
-    const d = (day[1] + "-" + day[0] + "-" + day[2]) as string
+    const m = isNaN(parseInt(dateStr!.month))
+      ? date.month()
+      : parseInt(dateStr!.month) - 1
+    const y = isNaN(parseInt(dateStr!.year))
+      ? date.year()
+      : parseInt(dateStr!.year)
+    const { date: day, month: mm, year: yy } = dateStr!
+    const d = (mm + "-" + day + "-" + yy) as string
     const obj = {
       month: m,
       year: y,
@@ -189,7 +265,8 @@ const Calender = ({
           ...month,
           date: date.format("MM-DD-YYYY"),
         })
-        setDateStr!(date.format("DD/MM/YYYY hh/mm a"))
+        // setDateStr!(date.format("DD/MM/YYYY hh/mm a"))
+        changeDate("date", date.format("MM-DD-YYYY"))
         setSwipeList([
           <Grid
             handleDayChange={handleDayChange}
@@ -213,41 +290,66 @@ const Calender = ({
   const handleYearChange = (year: number) => {
     const { month: currMonth } = month
     const currdate = dayjs(month.date).date()
-    const newMonth = date.year(year).month(currMonth).date(currdate)
-    const data = getMonth({ month: newMonth.month(), year: newMonth.year() })
-    setMonth({
-      ...month,
-      year: newMonth.year(),
-      dayList: data,
-      date: newMonth.format("MM-DD-YYYY"),
-    })
-    setDateStr!(newMonth.format("DD/MM/YYYY hh/mm a"))
-    setSwipeList([
-      <Grid
-        handleDayChange={handleDayChange}
-        selectedDay={newMonth.format("MM-DD-YYYY")}
-        currentDay={currentDay}
-        dayList={data}
-        key={newMonth.toString()}
-        position="change"
-        setList={setSwipeList}
-        left="0%"
-      />,
-    ])
+    if (dateStr.year !== "YYYY") {
+      const newMonth = date.year(year).month(currMonth).date(currdate)
+      const data = getMonth({ month: newMonth.month(), year: newMonth.year() })
+
+      setMonth({
+        ...month,
+        year: newMonth.year(),
+        dayList: data,
+        date: newMonth.format("MM-DD-YYYY"),
+      })
+      changeDate("date", newMonth.format("MM-DD-YYYY"))
+      setSwipeList([
+        <Grid
+          handleDayChange={handleDayChange}
+          selectedDay={newMonth.format("MM-DD-YYYY")}
+          currentDay={currentDay}
+          dayList={data}
+          key={newMonth.toString()}
+          position="change"
+          setList={setSwipeList}
+          left="0%"
+        />,
+      ])
+    } else {
+      const newMonth = date.year(year).month(currMonth).date(currdate)
+      const data = getMonth({ month: month.month, year: year })
+      setMonth({
+        ...month,
+        year: year,
+        dayList: data,
+      })
+      setSwipeList([
+        <Grid
+          handleDayChange={handleDayChange}
+          selectedDay={month.date}
+          currentDay={currentDay}
+          dayList={data}
+          key={newMonth.toString()}
+          position="change"
+          setList={setSwipeList}
+          left="0%"
+        />,
+      ])
+    }
   }
 
   const handleDayChange = (date: dayjs.Dayjs) => {
+    const dd = date.format("MM-DD-YYYY")
     setMonth({
       ...month,
-      date: date.format("MM-DD-YYYY"),
+      date: dd,
+      dayList: getMonth({ month: date.month(), year: date.year() }),
     })
-    setDateStr!(date.format("DD/MM/YYYY hh/mm a"))
+    changeDate("date", dd)
     setSwipeList([
       <Grid
         handleDayChange={handleDayChange}
-        selectedDay={date.format("MM-DD-YYYY")}
+        selectedDay={dd}
         currentDay={currentDay}
-        dayList={month.dayList}
+        dayList={getMonth({ month: date.month(), year: date.year() })}
         key={date.toString()}
         setList={setSwipeList}
         left="0%"
