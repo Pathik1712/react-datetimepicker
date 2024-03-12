@@ -8,7 +8,6 @@ import React, {
 } from "react"
 import "../datetimepicker.css"
 import { calenderContext, extraContext } from "../DateTimePicker"
-import dayjs from "dayjs"
 
 const TimePicker = ({ open }: { open: boolean }) => {
   const {
@@ -19,12 +18,15 @@ const TimePicker = ({ open }: { open: boolean }) => {
     selectedFontColor,
     setShowClock,
     changeDate,
+    handleOutClose,
+    mode,
+    clos,
+    setClose,
   } = useContext(calenderContext) as extraContext & Record<any, any>
 
   const clockRef = useRef<HTMLDivElement>(null)
   const pointerRef = useRef<HTMLDivElement>(null)
 
-  const [clos, setClose] = useState(true)
   const [minutes, setMinutes] = useState(false)
   const [visble, setVisible] = useState(true)
   const [drag, setDrag] = useState(false)
@@ -75,6 +77,7 @@ const TimePicker = ({ open }: { open: boolean }) => {
           }deg) translate(50%, -100%)`
           const minutes = mm % 60 === 0 ? "00" : `${mm}`
           changeDate("minutes", minutes)
+          handleOutClose(e)
         } else {
           const nearestHour = Math.round((normalizedDegrees % 360) / 30) % 12
           pointerRef.current!.style.transform = `rotate(${
@@ -94,7 +97,7 @@ const TimePicker = ({ open }: { open: boolean }) => {
         }
       }
     },
-    [minutes, dateStr]
+    [minutes, dateStr, open]
   )
 
   const handleMove = useCallback(
@@ -135,6 +138,9 @@ const TimePicker = ({ open }: { open: boolean }) => {
   }, [drag])
 
   useEffect(() => {
+    if (!open) {
+      return
+    }
     const h = dateStr?.hour === "hh" ? false : parseInt(dateStr!.hour)
     const m = dateStr?.minutes === "mm" ? false : parseInt(dateStr!.minutes)
     if (!minutes && h) {
@@ -147,18 +153,30 @@ const TimePicker = ({ open }: { open: boolean }) => {
         m * 6
       }deg) translate(50%, -100%)`
     }
-  }, [minutes])
+  }, [minutes, open])
+
+  useEffect(() => {
+    if (open) {
+      setClose(true)
+    }
+  }, [open])
 
   return (
-    clos && (
+    (clos || open) && (
       <main
         onTransitionEnd={(e) => {
-          if (e.target === e.currentTarget) {
-            setClose(false)
-            setShowClock!(false)
+          if (e.target === e.currentTarget && !open) {
+            if (mode !== "time picker") {
+              setClose(false)
+              setShowClock!(false)
+            } else {
+              setClose(false)
+              setVisible(true)
+              setMinutes(false)
+            }
           }
         }}
-        className={`hour-clock-container ${!open ? "clock-close" : ""}`}
+        className={`hour-clock-container ${clos && open && "clock-close"}`}
         style={{ color: clockFontColor, backgroundColor: popUpBackgroundColor }}
       >
         <div

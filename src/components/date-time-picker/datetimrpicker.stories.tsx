@@ -12,7 +12,14 @@ const Template: StoryFn<typeof DateTimePicker> = (args) => (
 
 export const RatingTest = Template.bind({})
 RatingTest.args = {
-  title: "Default theme",
-  theme: "primary",
-  testIdPrefix: "rating",
+  focusBorderColor: "hotpink",
+  // defaultDate: {
+  //   date: "31",
+  //   hour: "2",
+  //   minutes: "45",
+  //   month: "8",
+  //   year: "2024",
+  //   timeRange: "am",
+  // },
+  // mode: "time picker",
 }

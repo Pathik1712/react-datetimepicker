@@ -228,6 +228,8 @@
     padding-top: 15px;
     cursor: auto;
     transition: all 0.3s;
+    transform: scale(0.7);
+    opacity: 0;
 }
 
 
@@ -292,8 +294,8 @@
 }
 
 .clock-close {
-    transform: scale(0.7);
-    opacity: 0;
+    transform: scale(1);
+    opacity: 1;
 }
 
 @media (hover: hover) {

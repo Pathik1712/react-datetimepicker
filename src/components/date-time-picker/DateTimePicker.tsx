@@ -38,6 +38,15 @@ type props = {
   clockPointerColor: CSSProperties["backgroundColor"]
   popUpBackgroundColor: CSSProperties["backgroundColor"]
   selectedFontColor: CSSProperties["backgroundColor"]
+  defaultDate: {
+    date: string
+    month: string
+    year: string
+    hour: string
+    minutes: string
+    timeRange: "am" | "pm"
+  }
+  mode: "time picker" | "date picker" | "date time picker"
 }
 
 export type extraContext = {
@@ -64,6 +73,9 @@ export type extraContext = {
     key: "date" | "hour" | "minutes" | "timeRange" | "year" | "month",
     value: string
   ) => void
+  handleOutClose: (e: any) => void
+  clos: boolean
+  setClose: React.Dispatch<boolean>
 }
 
 export const calenderContext = createContext<
@@ -89,23 +101,74 @@ const DateTimePicker = ({
   clockFontColor = "gray",
   clockPointerColor = "dodgerblue",
   selectedFontColor = "white",
+  defaultDate,
+  mode = "date time picker",
 }: Partial<props>) => {
   const ref = useRef<HTMLDivElement>(null)
 
   const [open, setOpen] = useState(false)
+  const [clos, setClose] = useState(false)
 
-  const [dateStr, setDateStr] = useState({
-    date: "DD",
-    month: "MM",
-    year: "YYYY",
-    hour: "hh",
-    minutes: "mm",
-    timeRange: "aa",
+  const [dateStr, setDateStr] = useState(() => {
+    if (defaultDate == null) {
+      return {
+        date: "DD",
+        month: "MM",
+        year: "YYYY",
+        hour: "hh",
+        minutes: "mm",
+        timeRange: "aa",
+      }
+    } else {
+      const { date: d, hour, minutes, month, year } = defaultDate
+      const yy = parseInt(year)
+      const mm = parseInt(month)
+      const hh = parseInt(hour)
+      const mu = parseInt(minutes)
+      const dd = parseInt(d)
+      if (mode === "date picker" || mode === "date time picker") {
+        if (
+          year == null ||
+          yy < yearRange.startYear ||
+          yy > yearRange.endYear
+        ) {
+          throw Error(
+            "Year In defaultDate Must Be Between Year Range. Default Year Range Is 1950 And 2100"
+          )
+        } else if (mm == null || mm < 1 || mm > 12) {
+          throw Error("Month In defaultDate Must Be Between 1 And 12.")
+        } else if (
+          dd == null ||
+          dd < 1 ||
+          dd >
+            date
+              .year(yy)
+              .month(mm - 1)
+              .endOf("month")
+              .date()
+        ) {
+          throw Error("Date in defaultDate Is Not Valid.")
+        }
+      }
+      if (mode === "time picker" || mode === "date time picker") {
+        if (hh < 1 || hh > 12) {
+          throw Error("Hour In defaultDate Must Be Between 1 And 12.")
+        } else if (mu < 1 || mu > 60) {
+          throw Error("Minutes In defaultDate Must Be Between 1 And 60.")
+        }
+      }
+      return defaultDate
+    }
   })
-  const [showClock, setShowClock] = useState(false)
+  const [showClock, setShowClock] = useState(
+    mode === "time picker" ? true : false
+  )
 
   const handleOpen = useCallback(() => {
     setOpen(true)
+    if (mode === "date picker") {
+      setClose(true)
+    }
   }, [])
   const handleClose = useCallback((event: MouseEvent) => {
     if (ref.current && !ref.current.contains(event.target as Node)) {
@@ -114,8 +177,20 @@ const DateTimePicker = ({
     }
   }, [])
 
+  const handleOutClose = (e: any) => {
+    ;(e as MouseEvent).stopPropagation()
+    setOpen(false)
+    // onChange(getStr())
+  }
+
   const getStr = useCallback(() => {
-    return `${dateStr.date}/${dateStr.month}/${dateStr.year} ${dateStr.hour}/${dateStr.minutes} ${dateStr.timeRange}`
+    if (mode === "date picker") {
+      return `${dateStr.date}/${dateStr.month}/${dateStr.year}`
+    } else if (mode === "time picker") {
+      return `${dateStr.hour}/${dateStr.minutes} ${dateStr.timeRange}`
+    } else {
+      return `${dateStr.date}/${dateStr.month}/${dateStr.year} ${dateStr.hour}/${dateStr.minutes} ${dateStr.timeRange}`
+    }
   }, [dateStr])
 
   const changeDate = (
@@ -168,6 +243,12 @@ const DateTimePicker = ({
     return () => document.removeEventListener("click", handleClose)
   }, [])
 
+  useEffect(() => {
+    if (!open) {
+      onChange(getStr())
+    }
+  }, [open])
+
   return (
     <div
       className="input-div"
@@ -205,6 +286,10 @@ const DateTimePicker = ({
           dateStr,
           selectedFontColor,
           changeDate,
+          handleOutClose,
+          mode,
+          clos,
+          setClose,
         }}
       >
         {!showClock ? (
@@ -232,8 +317,9 @@ const Calender = ({
   color: string
   currentDay: string
 }) => {
-  const { yearRange, setDateStr, popUpBackgroundColor, dateStr, changeDate } =
-    useContext(calenderContext) as extraContext & Record<any, any>
+  const { yearRange, popUpBackgroundColor, dateStr, changeDate } = useContext(
+    calenderContext
+  ) as extraContext & Record<any, any>
 
   const [show, setShow] = useState(false)
   const [month, setMonth] = useState<{
@@ -265,7 +351,6 @@ const Calender = ({
           ...month,
           date: date.format("MM-DD-YYYY"),
         })
-        // setDateStr!(date.format("DD/MM/YYYY hh/mm a"))
         changeDate("date", date.format("MM-DD-YYYY"))
         setSwipeList([
           <Grid
@@ -514,8 +599,13 @@ const Grid = ({
   selectedDay: string
   handleDayChange: (date: dayjs.Dayjs) => void
 }) => {
-  const { calenderFontColor, selectedFontColor, setShowClock } =
-    useContext(calenderContext)
+  const {
+    calenderFontColor,
+    selectedFontColor,
+    setShowClock,
+    mode,
+    handleOutClose,
+  } = useContext(calenderContext)
   return (
     <div
       className="calender-swipe-item"
@@ -549,7 +639,11 @@ const Grid = ({
             onClick={(e) => {
               e.stopPropagation()
               handleDayChange(dayjs(i))
-              setShowClock!(true)
+              if (mode === "date picker") {
+                handleOutClose!(e)
+              } else {
+                setShowClock!(true)
+              }
             }}
           >
             {i != null && dayjs(i).date()}
