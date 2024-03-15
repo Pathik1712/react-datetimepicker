@@ -11,72 +11,13 @@ import React, {
 import "./datetimepicker.css"
 import CalenderSvg from "../../svg/Calender"
 import dayjs from "dayjs"
-import Arrow from "../../svg/Arrow.svg"
+import Arrow from "../../svg/Arrow"
 import Expand from "../../svg/Expand"
 import { getMonth } from "../../func/month"
 import TimePicker from "./components/TimePicker"
+import { props, extraContext } from "./datetimepicker"
 
 const date = dayjs()
-
-type props = {
-  FontColor: CSSProperties["backgroundColor"]
-  CalenderLogoColor: CSSProperties["backgroundColor"]
-  borderColor: CSSProperties["backgroundColor"]
-  width: CSSProperties["width"]
-  calenderSize: number
-  borderWidth: number
-  focusBorderColor: CSSProperties["backgroundColor"]
-  calenderFontColor: CSSProperties["backgroundColor"]
-  currentDayIndicatorCOlor: CSSProperties["backgroundColor"]
-  yearSelectorBackgroundColor: CSSProperties["backgroundColor"]
-  yearRange?: {
-    startYear: number
-    endYear: number
-  }
-  onChange: (value: string) => void
-  clockFontColor: CSSProperties["backgroundColor"]
-  clockPointerColor: CSSProperties["backgroundColor"]
-  popUpBackgroundColor: CSSProperties["backgroundColor"]
-  selectedFontColor: CSSProperties["backgroundColor"]
-  defaultDate: {
-    date: string
-    month: string
-    year: string
-    hour: string
-    minutes: string
-    timeRange: "am" | "pm"
-  }
-  mode: "time picker" | "date picker" | "date time picker"
-}
-
-export type extraContext = {
-  setDateStr: React.Dispatch<
-    React.SetStateAction<{
-      date: string
-      month: string
-      year: string
-      hour: string
-      minutes: string
-      timeRange: string
-    }>
-  >
-  setShowClock: React.Dispatch<React.SetStateAction<boolean>>
-  dateStr: {
-    date: string
-    month: string
-    year: string
-    hour: string
-    minutes: string
-    timeRange: string
-  }
-  changeDate: (
-    key: "date" | "hour" | "minutes" | "timeRange" | "year" | "month",
-    value: string
-  ) => void
-  handleOutClose: (e: any) => void
-  clos: boolean
-  setClose: React.Dispatch<boolean>
-}
 
 export const calenderContext = createContext<
   Partial<props> & Partial<extraContext>
@@ -306,7 +247,7 @@ const DateTimePicker = ({
   )
 }
 
-export default DateTimePicker
+export { DateTimePicker }
 
 const Calender = ({
   open,
@@ -551,13 +492,10 @@ const Calender = ({
             </h2>
             <span style={{ display: "flex", gap: 15 }}>
               <button onClick={handlePrev}>
-                <img src={Arrow} />
+                <Arrow />
               </button>
               <button onClick={handleNext}>
-                <img
-                  src={Arrow}
-                  style={{ transform: "rotate(180deg)" }}
-                />
+                <Arrow rotate={true} />
               </button>
             </span>
           </div>
