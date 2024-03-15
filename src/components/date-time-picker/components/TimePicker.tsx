@@ -8,7 +8,7 @@ import React, {
 } from "react"
 import "../datetimepicker.css"
 import { calenderContext } from "../DateTimePicker"
-import { extraContext } from "../datetimepicker"
+import { extraContext } from "../datetimepicker.types"
 
 const TimePicker = ({ open }: { open: boolean }) => {
   const {

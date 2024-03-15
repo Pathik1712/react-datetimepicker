@@ -16,12 +16,12 @@
     font-family: monospace;
     cursor: pointer;
     position: relative;
-    margin-left: 30%;
     background-color: inherit;
 }
 
 
 .input-div>p {
+    margin: 0;
     font-weight: 500;
     white-space: pre;
     overflow: hidden;

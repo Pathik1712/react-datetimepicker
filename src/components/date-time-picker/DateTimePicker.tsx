@@ -15,7 +15,7 @@ import Arrow from "../../svg/Arrow"
 import Expand from "../../svg/Expand"
 import { getMonth } from "../../func/month"
 import TimePicker from "./components/TimePicker"
-import { props, extraContext } from "./datetimepicker"
+import { props, extraContext } from "./datetimepicker.types"
 
 const date = dayjs()
 
@@ -23,7 +23,7 @@ export const calenderContext = createContext<
   Partial<props> & Partial<extraContext>
 >({})
 
-const DateTimePicker = ({
+const DateTimePicker: React.FC<Partial<props>> = ({
   FontColor = "gray",
   CalenderLogoColor = "gray",
   borderColor = "gray",
@@ -44,7 +44,10 @@ const DateTimePicker = ({
   selectedFontColor = "white",
   defaultDate,
   mode = "date time picker",
-}: Partial<props>) => {
+  popUpBackgroundColor = "inherit",
+  focusCalenderColor = "dodgerblue",
+  paddingBlock = "15px",
+}) => {
   const ref = useRef<HTMLDivElement>(null)
 
   const [open, setOpen] = useState(false)
@@ -202,10 +205,10 @@ const DateTimePicker = ({
         color: FontColor,
       }}
     >
-      <p>{getStr()}</p>
+      <p style={{ paddingBlock }}>{getStr()}</p>
       <CalenderSvg
         height={calenderSize}
-        color={CalenderLogoColor}
+        color={open ? focusCalenderColor : CalenderLogoColor}
       />
       <calenderContext.Provider
         value={{
@@ -231,6 +234,7 @@ const DateTimePicker = ({
           mode,
           clos,
           setClose,
+          popUpBackgroundColor,
         }}
       >
         {!showClock ? (
@@ -483,7 +487,14 @@ const Calender = ({
       >
         <div className="calender-main">
           <div className="calender-header">
-            <h2 style={{ display: "flex", position: "relative" }}>
+            <h2
+              style={{
+                display: "flex",
+                position: "relative",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
               {date.year(month.year).month(month.month).format("MMMM YYYY")}
               <YearSelector
                 handleClick={handleYearChange}
