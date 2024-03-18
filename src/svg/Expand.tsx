@@ -1,9 +1,9 @@
 import React from "react"
 
-const Expand = () => {
+const Expand = ({ color }: { color: string }) => {
   return (
     <svg
-      fill="gray"
+      fill={color}
       height="10px"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"

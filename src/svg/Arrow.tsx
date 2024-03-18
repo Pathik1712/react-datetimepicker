@@ -1,9 +1,9 @@
 import React from "react"
 
-const Arrow = ({ rotate }: { rotate?: boolean }) => {
+const Arrow = ({ rotate, color }: { rotate?: boolean; color: string }) => {
   return (
     <svg
-      fill="gray"
+      fill={color}
       height="20px"
       viewBox="0 0 24 24"
       style={{ transform: `${rotate ? "rotate(180deg)" : ""}` }}

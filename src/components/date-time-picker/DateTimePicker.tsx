@@ -47,6 +47,7 @@ const DateTimePicker: React.FC<Partial<props>> = ({
   popUpBackgroundColor = "inherit",
   focusCalenderColor = "dodgerblue",
   paddingBlock = "15px",
+  arrowsColor = "gray",
 }) => {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -195,7 +196,7 @@ const DateTimePicker: React.FC<Partial<props>> = ({
 
   return (
     <div
-      className="input-div"
+      className="rdtc-input-div"
       ref={ref}
       onClick={handleOpen}
       style={{
@@ -235,6 +236,7 @@ const DateTimePicker: React.FC<Partial<props>> = ({
           clos,
           setClose,
           popUpBackgroundColor,
+          arrowsColor,
         }}
       >
         {!showClock ? (
@@ -262,9 +264,8 @@ const Calender = ({
   color: string
   currentDay: string
 }) => {
-  const { yearRange, popUpBackgroundColor, dateStr, changeDate } = useContext(
-    calenderContext
-  ) as extraContext & Record<any, any>
+  const { yearRange, popUpBackgroundColor, dateStr, changeDate, arrowsColor } =
+    useContext(calenderContext) as extraContext & Record<any, any>
 
   const [show, setShow] = useState(false)
   const [month, setMonth] = useState<{
@@ -503,10 +504,13 @@ const Calender = ({
             </h2>
             <span style={{ display: "flex", gap: 15 }}>
               <button onClick={handlePrev}>
-                <Arrow />
+                <Arrow color={arrowsColor} />
               </button>
               <button onClick={handleNext}>
-                <Arrow rotate={true} />
+                <Arrow
+                  rotate={true}
+                  color={arrowsColor}
+                />
               </button>
             </span>
           </div>
@@ -614,8 +618,12 @@ const YearSelector = ({
 
   const [open, setOpen] = useState(false)
 
-  const { yearSelectorBackgroundColor, calenderFontColor, yearRange } =
-    useContext(calenderContext)
+  const {
+    yearSelectorBackgroundColor,
+    calenderFontColor,
+    yearRange,
+    arrowsColor,
+  } = useContext(calenderContext)
 
   const yearList = useMemo(() => {
     const { endYear, startYear } = yearRange!
@@ -649,7 +657,7 @@ const YearSelector = ({
           }}
           style={{ transform: `rotate(${!open ? "0deg" : "-180deg"})` }}
         >
-          <Expand />
+          <Expand color={arrowsColor!} />
         </button>
       </div>
       <ul

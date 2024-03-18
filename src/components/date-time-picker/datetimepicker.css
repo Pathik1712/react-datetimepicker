@@ -4,7 +4,7 @@
 }
 
 
-.input-div {
+.rdtc-input-div {
     display: flex;
     align-items: center;
     border: 1px solid gray;
@@ -20,7 +20,7 @@
 }
 
 
-.input-div>p {
+.rdtc-input-div>p {
     margin: 0;
     font-weight: 500;
     white-space: pre;
@@ -28,7 +28,7 @@
     text-overflow: ellipsis;
 }
 
-.input-div>svg {
+.rdtc-input-div>svg {
     margin-left: 1rem;
 }
 

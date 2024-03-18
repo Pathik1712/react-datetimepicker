@@ -1,6 +1,5 @@
 import { CSSProperties } from "react"
-
-type props = {
+interface props {
   FontColor: CSSProperties["backgroundColor"]
   CalenderLogoColor: CSSProperties["backgroundColor"]
   borderColor: CSSProperties["backgroundColor"]
@@ -29,6 +28,9 @@ type props = {
     timeRange: "am" | "pm"
   }
   mode: "time picker" | "date picker" | "date time picker"
+  focusCalenderColor: CSSProperties["backgroundColor"]
+  paddingBlock: CSSProperties["paddingBlock"]
+  arrowsColor: CSSProperties["backgroundColor"]
 }
 
 export const DateTimePicker: React.FC<Partial<props>>

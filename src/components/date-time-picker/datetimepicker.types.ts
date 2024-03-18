@@ -31,6 +31,7 @@ export interface props {
   mode: "time picker" | "date picker" | "date time picker"
   focusCalenderColor: CSSProperties["backgroundColor"]
   paddingBlock: CSSProperties["paddingBlock"]
+  arrowsColor: CSSProperties["backgroundColor"]
 }
 
 export interface extraContext {
