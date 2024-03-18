@@ -74,3 +74,13 @@ export default function Home() {
 | mode                        | for using date picker or time picker or both date end time picker | ate time picker |
 | paddingBlock                | padding block of input element                                    | 15 px           |
 | arrowsColor                 | color of all arrows inside calender                               | gray            |
+
+### License
+
+The MIT License
+
+---
+
+### Author
+
+Pathik Chauhan
