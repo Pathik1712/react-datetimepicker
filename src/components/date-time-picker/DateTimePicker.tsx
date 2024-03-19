@@ -1,5 +1,4 @@
 import React, {
-  CSSProperties,
   useCallback,
   useEffect,
   useMemo,
@@ -33,7 +32,6 @@ const DateTimePicker: React.FC<Partial<props>> = ({
   focusBorderColor = "dodgerblue",
   calenderFontColor = "dodgerblue",
   currentDayIndicatorCOlor = "gray",
-  yearSelectorBackgroundColor = "white",
   yearRange = {
     startYear: 1950,
     endYear: 2100,
@@ -115,6 +113,7 @@ const DateTimePicker: React.FC<Partial<props>> = ({
       setClose(true)
     }
   }, [])
+
   const handleClose = useCallback((event: MouseEvent) => {
     if (ref.current && !ref.current.contains(event.target as Node)) {
       setOpen(false)
@@ -222,7 +221,6 @@ const DateTimePicker: React.FC<Partial<props>> = ({
           focusBorderColor,
           calenderFontColor,
           currentDayIndicatorCOlor,
-          yearSelectorBackgroundColor,
           setDateStr,
           yearRange,
           setShowClock,
@@ -619,10 +617,11 @@ const YearSelector = ({
   const [open, setOpen] = useState(false)
 
   const {
-    yearSelectorBackgroundColor,
     calenderFontColor,
     yearRange,
     arrowsColor,
+    popUpBackgroundColor,
+    selectedFontColor,
   } = useContext(calenderContext)
 
   const yearList = useMemo(() => {
@@ -665,7 +664,7 @@ const YearSelector = ({
         className="year-selector-list"
         style={{
           transform: `scale(${!open ? "0%" : "100%"})`,
-          backgroundColor: yearSelectorBackgroundColor,
+          backgroundColor: popUpBackgroundColor,
         }}
       >
         {yearList.map((i) => (
@@ -673,9 +672,7 @@ const YearSelector = ({
             <button
               style={{
                 color:
-                  i === currentYear
-                    ? yearSelectorBackgroundColor
-                    : calenderFontColor,
+                  i === currentYear ? selectedFontColor : calenderFontColor,
                 backgroundColor: i !== currentYear ? "" : calenderFontColor,
               }}
               onClick={() => {

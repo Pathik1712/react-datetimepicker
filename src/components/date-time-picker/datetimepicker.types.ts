@@ -10,7 +10,6 @@ export interface props {
   focusBorderColor: CSSProperties["backgroundColor"]
   calenderFontColor: CSSProperties["backgroundColor"]
   currentDayIndicatorCOlor: CSSProperties["backgroundColor"]
-  yearSelectorBackgroundColor: CSSProperties["backgroundColor"]
   yearRange?: {
     startYear: number
     endYear: number
