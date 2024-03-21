@@ -212,6 +212,7 @@
 }
 
 .hour-clock-container {
+    z-index: 20000;
     background-color: inherit;
     height: 280px;
     width: 250px;
