@@ -8,13 +8,22 @@ A date and time picker for your React app
 - Use date-picker, time-picker or date-time-picker
 - No extra dependency like moment.js or day.js needed
 
+---
+
+![react date time calender photo](/Image//image-2.png)
+
+---
+
+![react date time calender photo](/Image//image-1.png)
+
+---
 ## Demo
 
 ---
 
 A minimal demo can be found with react.date.time.calender below.
 
-[online demo]()
+[online demo](https://demo-react-date-time-calender-git-main-pathik1712.vercel.app/)
 
 ## Getting Started
 
