@@ -10,13 +10,14 @@ A date and time picker for your React app
 
 ---
 
-![react date time calender photo](/Image//image-2.png)
+![sample image 1](https://github.com/pathikcomp/images/assets/150209179/ff71ab9a-bdaa-4a1e-807c-41decf4738c6)
 
 ---
 
-![react date time calender photo](/Image//image-1.png)
+![sample image 2](https://github.com/pathikcomp/images/assets/150209179/9f8b4833-8780-4d8c-83cf-1a0175f9693d)
 
 ---
+
 ## Demo
 
 ---

@@ -1,6 +1,6 @@
 {
   "name": "react.date.time.calender",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "react-date-time-picker library offers a comprehensive set of components and tools for seamlessly integrating date and time selection functionality into React applications. With a focus on simplicity and flexibility, the library provides user-friendly interfaces like date pickers, time pickers, and combined date-time pickers, allowing developers to enhance the user experience effortlessly. This library supports extensive customization, enabling developers to tailor the appearance and behavior of the components to suit their application's unique design. Features such as range selection, event handling, accessibility support, and responsive design ensure a versatile and inclusive solution.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -51,5 +51,9 @@
   "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pathik1712/react-datetimepicker.git"
   }
 }
