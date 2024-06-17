@@ -13,6 +13,11 @@ const Template: StoryFn<typeof DateTimePicker> = (args) => (
 export const RatingTest = Template.bind({})
 RatingTest.args = {
   focusBorderColor: "hotpink",
+  // maxDate: {
+  //   date: 17,
+  //   month: 6,
+  //   year: 2024,
+  // },
   // defaultDate: {
   //   date: "31",
   //   hour: "2",

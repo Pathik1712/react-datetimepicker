@@ -42,10 +42,12 @@ const DateTimePicker: React.FC<Partial<props>> = ({
   selectedFontColor = "white",
   defaultDate,
   mode = "date time picker",
-  popUpBackgroundColor = "inherit",
+  popUpBackgroundColor = "white",
   focusCalenderColor = "dodgerblue",
   paddingBlock = "15px",
   arrowsColor = "gray",
+  style,
+  maxDate,
 }) => {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -203,6 +205,7 @@ const DateTimePicker: React.FC<Partial<props>> = ({
         borderWidth,
         width,
         color: FontColor,
+        ...style,
       }}
     >
       <p style={{ paddingBlock }}>{getStr()}</p>
@@ -235,6 +238,7 @@ const DateTimePicker: React.FC<Partial<props>> = ({
           setClose,
           popUpBackgroundColor,
           arrowsColor,
+          maxDate,
         }}
       >
         {!showClock ? (
@@ -556,6 +560,7 @@ const Grid = ({
     setShowClock,
     mode,
     handleOutClose,
+    maxDate,
   } = useContext(calenderContext)
   return (
     <div
@@ -585,15 +590,40 @@ const Grid = ({
                   : "",
               visibility: i == null ? "hidden" : "initial",
               backgroundColor: selectedDay === i ? calenderFontColor : "",
-              color: selectedDay === i ? selectedFontColor : "",
+              color:
+                selectedDay === i
+                  ? selectedFontColor
+                  : maxDate &&
+                    dayjs(i).isAfter(
+                      dayjs(
+                        new Date(
+                          maxDate?.year,
+                          maxDate?.month - 1,
+                          maxDate?.date
+                        )
+                      ).format("MM-DD-YYYY")
+                    )
+                  ? "gray"
+                  : "",
             }}
             onClick={(e) => {
               e.stopPropagation()
-              handleDayChange(dayjs(i))
-              if (mode === "date picker") {
-                handleOutClose!(e)
-              } else {
-                setShowClock!(true)
+              if (
+                !(
+                  maxDate &&
+                  dayjs(i).isAfter(
+                    dayjs(
+                      new Date(maxDate?.year, maxDate?.month - 1, maxDate?.date)
+                    ).format("MM-DD-YYYY")
+                  )
+                )
+              ) {
+                handleDayChange(dayjs(i))
+                if (mode === "date picker") {
+                  handleOutClose!(e)
+                } else {
+                  setShowClock!(true)
+                }
               }
             }}
           >

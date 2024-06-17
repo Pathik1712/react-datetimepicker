@@ -64,6 +64,8 @@ export default function Home() {
 | Props Name                  | Description                                                       | Default value   |
 | --------------------------- | ----------------------------------------------------------------- | --------------- |
 | FontColor                   | text color of fonts in input element                              | gray            |
+| styles                      | styles for input element                                          | N/A             |
+| maxDate                     | maximum date that user can select                                 | N/A             |
 | CalenderLogoColor           | color of calender logo when its not focus                         | gray            |
 | focusCalenderColor          | calender logo color when on focus                                 | dodgerblue      |
 | borderColor                 | border color of input element when not focus                      | gray            |

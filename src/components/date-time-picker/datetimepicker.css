@@ -220,7 +220,8 @@
     box-shadow: var(--shadow);
     position: absolute;
     top: 120%;
-    left: 0;
+    left: 50%;
+    /* transform: translateX(-50%); */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -229,7 +230,7 @@
     padding-top: 15px;
     cursor: auto;
     transition: all 0.3s;
-    transform: scale(0.7);
+    transform: scale(0.7) translateX(-50%);
     opacity: 0;
 }
 
@@ -295,7 +296,7 @@
 }
 
 .clock-close {
-    transform: scale(1);
+    transform: scale(1) translateX(-50%);
     opacity: 1;
 }
 

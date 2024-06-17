@@ -1,6 +1,7 @@
 import { CSSProperties } from "react"
 
 export interface props {
+  style: CSSProperties
   FontColor: CSSProperties["backgroundColor"]
   CalenderLogoColor: CSSProperties["backgroundColor"]
   borderColor: CSSProperties["backgroundColor"]
@@ -31,6 +32,11 @@ export interface props {
   focusCalenderColor: CSSProperties["backgroundColor"]
   paddingBlock: CSSProperties["paddingBlock"]
   arrowsColor: CSSProperties["backgroundColor"]
+  maxDate: {
+    date: number
+    month: number
+    year: number
+  }
 }
 
 export interface extraContext {
