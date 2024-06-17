@@ -31,6 +31,12 @@ interface props {
   focusCalenderColor: CSSProperties["backgroundColor"]
   paddingBlock: CSSProperties["paddingBlock"]
   arrowsColor: CSSProperties["backgroundColor"]
+  style: CSSProperties
+  maxDate: {
+    date: number
+    month: number
+    year: number
+  }
 }
 
 export const DateTimePicker: React.FC<Partial<props>>
